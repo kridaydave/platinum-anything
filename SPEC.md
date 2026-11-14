@@ -62,7 +62,7 @@ Rejected with reasons: a full dependency board cannot tell a player what to do t
 
 ### Generation power (#4, ADR 0002)
 
-v1 generates routes on Kriday's own machine with the Codex CLI, driving his ChatGPT Plus login. Codex does the web search, fetches the guide pages, checks its own work, writes the route, and the PDF renders outside the Codex sandbox with Playwright chromium. No metered LLM API key is part of v1. Measured: a full 51-trophy route costs about $0.06 metered and takes 9.6 minutes, three modes in one pass cost the same as one, and out-of-pocket is $0 because the runs ride the Plus subscription. The real cost is plan quota, which peaked at 34% of the primary window over a week.
+v1 generates routes on Kriday's own machine with the Codex CLI, driving his ChatGPT Plus login. The backend is `codex exec` with `tools.web_search=true` on the Codex default model `gpt-6-luna`; Sol stays the fallback for routes that come back weak. Codex does the web search, fetches the guide pages, checks its own work, writes the route, and the PDF renders outside the Codex sandbox with Playwright chromium. No metered LLM API key is part of v1. Measured: a full 51-trophy route costs about $0.06 metered and takes 9.6 minutes, three modes in one pass cost the same as one, and out-of-pocket is $0 because the runs ride the Plus subscription. The real cost is plan quota, which peaked at 34% of the primary window over a week.
 
 Rejected with reasons: one API call with built-in search costs about ten times as much, needs a billed account that does not exist here, and works from snippets rather than the real guide page. A hybrid split adds a card, a key, and a second way to fail. Shipping the harness to gamers contradicts the no-hosting v1.
 
@@ -132,7 +132,7 @@ PSN import is not part of v1 and no progress state is stored.
 
 ### Generation contract (settled for v1)
 
-A v1 run is Codex CLI on Kriday's machine, riding the ChatGPT Plus login, with `tools.web_search=true` and the workspace-write sandbox flags from the operational section. The run fetches real guide pages (PowerPyx confirmed reachable; PlayStationTrophies and PSNProfiles confirmed 403), runs the mandatory verification loop, and writes the route. The PDF render runs outside the Codex sandbox with Playwright chromium. One run emits every named mode. The run records wall clock and token counts. Full detail and rationale live in ADR 0002.
+A v1 run is Codex CLI on Kriday's machine, riding the ChatGPT Plus login, on `gpt-6-luna` with Sol as the fallback for weak routes, `tools.web_search=true`, and the workspace-write sandbox flags from the operational section. The run fetches real guide pages (PowerPyx confirmed reachable; PlayStationTrophies and PSNProfiles confirmed 403), runs the mandatory verification loop, and writes the route. The PDF render runs outside the Codex sandbox with Playwright chromium. One run emits every named mode. The run records wall clock and token counts. Full detail and rationale live in ADR 0002.
 
 ### Output contract (settled for v1, mode content pending #3)
 
