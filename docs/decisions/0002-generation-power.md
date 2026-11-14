@@ -4,7 +4,7 @@ Status: accepted for v1
 Date: 2026-11-14
 Ticket: [#4](https://github.com/kridaydave/platinum-anything/issues/4)
 Branch: `ticket/4-generation-power`
-Measurements: [NOTES.md](https://github.com/kridaydave/platinum-anything/blob/ticket/4-generation-power/NOTES.md) (lives on `ticket/4-generation-power`, not on the branch carrying this ADR)
+Measurements: [NOTES.md](../../NOTES.md)
 
 ## Decision
 
