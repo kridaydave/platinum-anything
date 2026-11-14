@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction A - route line</title>
+<!--
+  plat-anything mockup, direction A of 3: "the route is a line".
+
+  Assumptions:
+  - Issue #5 settled a harness-generated, phone-readable PDF. So this page is one
+    narrow column, phone width, with print CSS so the same HTML becomes the PDF.
+  - Sample data is an MK-style list written for this mockup, not a real game's list.
+  - The shape argument: an ordered route players tick off. Dependencies are flattened
+    into tags on steps ("do before step 18"), not drawn as a graph.
+  Anchor: Massimo Vignelli's subway diagrams. Stops in order, one line, tier colors
+  as the only color system.
+-->
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000; --ink:#fff; --dim:#a3a3a3; --faint:#525252; --line:#262626;
+    --gold:#e0a832; --silver:#c9c9c9; --bronze:#b08d57; --miss:#ff433d;
+    --box:#111;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:'Archivo',Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .page{max-width:680px;margin:0 auto;padding:48px 20px 80px}
+
+  /* header */
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
+  h1{font-size:clamp(34px,7vw,56px);font-weight:900;letter-spacing:-.02em;line-height:.95;margin:10px 0 6px;text-transform:uppercase}
+  .sub{color:var(--dim);font-size:14px;line-height:1.6;max-width:52ch}
+  .stats{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);margin:28px 0 8px}
+  .stat{flex:1 1 100px;padding:12px 14px;border-right:1px solid var(--line);min-width:100px}
+  .stat:last-child{border-right:none}
+  .stat b{display:block;font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700}
+  .stat span{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.12em}
+  .stat.miss b{color:var(--miss)}
+
+  /* legend */
+  .legend{display:flex;flex-wrap:wrap;gap:14px;padding:10px 0 0;font-size:12px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:-1px;margin-right:6px}
+  .g{background:var(--gold)} .s{background:var(--silver)} .b{background:var(--bronze)} .m{background:var(--miss)}
+
+  /* route line */
+  .phase{margin-top:44px}
+  .phase-bar{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px}
+  .phase-bar h2{font-size:19px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+  .phase-bar .mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim)}
+  .phase-note{font-size:13px;color:var(--dim);margin:10px 0 18px;line-height:1.55;max-width:58ch}
+
+  .stop{position:relative;display:grid;grid-template-columns:30px 34px 26px 1fr;gap:0 10px;padding:13px 0}
+  .stop::before{content:"";position:absolute;left:96px;top:0;bottom:0;width:2px;background:var(--line)}
+  .stop:first-child::before{top:18px}
+  .stop:last-child::before{bottom:auto;height:18px}
+  .stop:only-child::before{display:none}
+  .num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--faint);padding-top:3px;text-align:right}
+  .tick{width:15px;height:15px;border:1.5px solid var(--faint);margin-top:3px}
+  .done .tick{background:var(--ink);border-color:var(--ink)}
+  .done .name{color:var(--dim);text-decoration:line-through;text-decoration-color:var(--faint)}
+  .node{width:14px;height:14px;border-radius:50%;justify-self:center;margin-top:3px;position:relative;z-index:1}
+  .gold{background:var(--gold)} .silver{background:var(--silver)} .bronze{background:var(--bronze)} .plat{background:var(--ink);border-radius:2px;width:12px;height:12px}
+  .stop.missable .node{outline:2px solid var(--miss);outline-offset:2px}
+  .body{min-width:0}
+  .name{font-size:15.5px;font-weight:700;line-height:1.3}
+  .req{font-size:13px;color:var(--dim);line-height:1.5;margin-top:2px}
+  .tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 7px;border:1px solid var(--line);color:var(--dim)}
+  .tag.warn{border-color:var(--miss);color:var(--miss)}
+  .tag.lock{color:var(--ink);border-color:var(--faint)}
+
+  .final{margin-top:52px;border:1px solid var(--line);padding:18px}
+  .final .kicker{margin-bottom:6px}
+  .final p{font-size:13.5px;color:var(--dim);line-height:1.6}
+  .final b{color:var(--ink)}
+
+  /* print: same HTML becomes the PDF. one phase per page */
+  @media print{
+    body{background:#fff;color:#000}
+    :root{--ink:#000;--dim:#444;--faint:#777;--line:#ddd;--gold:#8a6a1e;--silver:#555;--bronze:#7a5c33;--miss:#b32017;--box:#fff}
+    .page{max-width:none;padding:0}
+    .phase{break-before:page}
+    .phase:first-of-type{break-before:auto}
+    .stop{break-inside:avoid}
+  }
+  @media (max-width:520px){
+    .stop{grid-template-columns:24px 26px 22px 1fr}
+    .stop::before{left:80px}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="kicker">plat-anything / direction A of 3 / sample data, MK-style</div>
+  <h1>Platinum route</h1>
+  <p class="sub">One line, 22 stops, in the order you do them. Tick the box on your phone or on paper. The tags tell you when a step can be missed or what it needs. The full trophy list hides behind the route, so the route stays short enough to read while the game is paused.</p>
+
+  <div class="stats">
+    <div class="stat"><b>22</b><span>route steps</span></div>
+    <div class="stat"><b>50</b><span>trophies covered</span></div>
+    <div class="stat miss"><b>4</b><span>missable</span></div>
+    <div class="stat"><b>2</b><span>playthroughs</span></div>
+    <div class="stat"><b>~34h</b><span>total estimate</span></div>
+  </div>
+
+  <div class="legend">
+    <span><i class="dot g"></i>gold</span>
+    <span><i class="dot s"></i>silver</span>
+    <span><i class="dot b"></i>bronze</span>
+    <span><i class="dot m"></i>missable</span>
+  </div>
+
+  <div class="phase">
+    <div class="phase-bar"><h2>Phase 1</h2><span class="mono">story run, normal / steps 1 to 8</span></div>
+    <p class="phase-note">One clean run through the story on normal. Do not start the Krypt yet. Two trophies here want specific chapter finishes, so read the tag before you start a chapter.</p>
+
+    <div class="stop done">
+      <div class="num">01</div><div class="tick"></div><div class="node bronze"></div>
+      <div class="body"><div class="name">Blood Sport</div><div class="req">Win your first versus match, any mode</div><div class="tags"><span class="tag">bronze</span></div></div>
+    </div>
+    <div class="stop done">
+      <div class="num">02</div><div class="tick"></div><div class="node bronze"></div>
+      <div class="body"><div class="name">Ten-Piece Set</div><div class="req">Land a 10-hit kombo in a real fight</div><div class="tags"><span class="tag">bronze</span><span class="tag">tip: Scorpion, easy combo trial 4 translated to versus</span></div></div>
+    </div>
+    <div class="stop">
+      <div class="num">03</div><div class="tick"></div><div class="node bronze"></div>
+      <div class="body"><div class="name">It's Officially Over</div><div class="req">Complete story chapter 3</div><div class="tags"><span class="tag">bronze</span><span class="tag">story</span></div></div>
+    </div>
+    <div class="stop missable">
+      <div class="num">04</div><div class="tick"></div><div class="node silver"></div>
+      <div class="body"><div class="name">Merciless</div><div class="req">Finish the story without changing difficulty down</div><div class="tags"><span class="tag silver-note">silver</span><span class="tag warn">MISSABLE: locks to this run</span></div></div>
+    </div>
+    <div class="stop">
+      <div class="num">05</div><div class="tick"></div><div class="node bronze"></div>
+      <div class="body"><div class="name">Chapter and Verse</div><div class="req">Complete all 12 story chapters</div><div class="tags"><span class="tag">silver</span><span class="tag">completes with steps 03 to 08</span></div></div>
+    </div>
+    <div class="stop missable">
+      <div class="num">06</div><div class="tick"></div><div class="node gold"></div>
+      <div class="body"><div class="name">There Are No Flukes</div><div class="req">Beat the final boss without losing a round in the last fight</div><div class="tags"><span class="tag">gold</span><span class="tag warn">MISSABLE: run 1 only, retry resets the streak</span></div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-bar"><h2>Phase 2</h2><span class="mono">the Krypt / steps 9 to 12</span></div>
+    <p class="phase-note">The Krypt has no missables, so it waits until the story is safe. Steps here stack: every fight from later phases feeds the gear count, so leave nothing specific to grind.</p>
+
+    <div class="stop">
+      <div class="num">09</div><div class="tick"></div><div class="node bronze"></div>
+      <div class="body"><div class="name">Grave Robber</div><div class="req">Open the Krypt and collect your first 10 items</div><div class="tags"><span class="tag">bronze</span></div></div>
+    </div>
+    <div class="stop">
+      <div class="num">10</div><div class="tick"></div><div class="node gold"></div>
+      <div class="body"><div class="name">Krypt Keeper</div><div class="req">Collect 200 Krypt items</div><div class="tags"><span class="tag">gold</span><span class="tag lock">needs step 09</span><span class="tag">grind, ~2h</span></div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-bar"><h2>Phase 3</h2><span class="mono">towers and fatalities / steps 13 to 18</span></div>
+    <p class="phase-note">Towers next. The fatality count grows in the background while you clear tower fights, so do them in the same sessions instead of two separate grinds.</p>
+
+    <div class="stop">
+      <div class="num">13</div><div class="tick"></div><div class="node bronze"></div>
+      <div class="body"><div class="name">Fatal Attraction</div><div class="req">Perform any fatality</div><div class="tags"><span class="tag">bronze</span><span class="tag lock">needs a Krypt fatality token, step 10 area</span></div></div>
+    </div>
+    <div class="stop">
+      <div class="num">14</div><div class="tick"></div><div class="node silver"></div>
+      <div class="body"><div class="name">Fatality Fiction</div><div class="req">Perform 10 different fatalities</div><div class="tags"><span class="tag">silver</span><span class="tag lock">needs step 13</span><span class="tag">stacks with towers</span></div></div>
+    </div>
+    <div class="stop missable">
+      <div class="num">15</div><div class="tick"></div><div class="node gold"></div>
+      <div class="body"><div class="name">Tower Time</div><div class="req">Clear all Towers of Time before a season ends</div><div class="tags"><span class="tag">gold</span><span class="tag warn">MISSABLE: seasonal, check the tower list first</span></div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-bar"><h2>Phase 4</h2><span class="mono">cleanup and platinum / steps 19 to 22</span></div>
+    <p class="phase-note">Everything left is a grind with no order. The platinum pops with the last trophy, nothing extra to do.</p>
+
+    <div class="stop">
+      <div class="num">19</div><div class="tick"></div><div class="node bronze"></div>
+      <div class="body"><div class="name">Krowd Favorite</div><div class="req">Play 50 matches against other players, win or lose</div><div class="tags"><span class="tag">bronze</span><span class="tag">grind, stacks with step 21</span></div></div>
+    </div>
+    <div class="stop">
+      <div class="num">22</div><div class="tick"></div><div class="node plat"></div>
+      <div class="body"><div class="name">Elder God</div><div class="req">Unlock every other trophy</div><div class="tags"><span class="tag">platinum</span><span class="tag lock">last</span></div></div>
+    </div>
+  </div>
+
+  <div class="final">
+    <div class="kicker">how this works</div>
+    <p>The order is the product. Every tag answers the two questions a player actually has mid-run: <b>can I lose this?</b> and <b>what does it need first?</b> Missables sit inside their phase instead of a separate scary list, because you meet them where they happen. Print gives one phase per page, so the sheet survives the couch.</p>
+  </div>
+
+</div>
+</body>
+</html>
