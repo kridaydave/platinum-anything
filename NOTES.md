@@ -1,6 +1,6 @@
 # Ticket #4 notes: what powers the generation
 
-Working notes for issue #4 on kridaydave/platinum-anything. Branch `ticket/4-generation-power`.
+Working notes for issue #4 on kridaydave/platinum-anything. Branch `ticket/4-generation-power`. The decision built on top of these notes is [ADR 0002](docs/decisions/0002-generation-power.md).
 
 ## Settled context this ticket builds on
 
