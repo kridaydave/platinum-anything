@@ -42,7 +42,10 @@ Honest state, as of 2026-11-14:
 - The render path is verified on this machine. `scripts/render-pdf.sh` was
   run against the route mockup from ticket 2 and produced a real 6 page A5
   PDF. The one page failure case also verified: the script exits non-zero
-  with a loud message instead of shipping a broken PDF.
+  with a loud message instead of shipping a broken PDF. If the input HTML
+  has no @page rule naming a size, the script injects a default A5 rule
+  into a temp copy before rendering, so the PDF cannot silently come out
+  Letter shaped.
 - The full generation path is NOT verified end to end. The ChatGPT Plus
   login hit its usage limit on 2026-11-14 and resets Nov 15th, 2026
   1:43 AM. `scripts/generate.sh` was exercised with a stub codex that

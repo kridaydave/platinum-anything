@@ -102,8 +102,8 @@ Write the finished route to route.html in the working directory. The render
 step turns it into route.pdf, so the HTML must carry its own print rules.
 
 mockups/a-route-line.html in the working directory holds the exact shape
-and CSS. Follow it. Its print section already has the phase breaks and the
-print palette; add `@page { size: A5; margin: 10mm }` for the page size.
+and CSS. Follow it. Its print section already has the A5 page rule, the
+phase breaks, and the print palette.
 
 - One phase per printed page. A5, phone readable: big type, tap friendly
   spacing, readable as a narrow column. Dark ink on black on screen, and

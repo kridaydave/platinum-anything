@@ -77,6 +77,7 @@
 
   /* print: same HTML becomes the PDF. one phase per page */
   @media print{
+    @page{size:A5;margin:13mm 12mm}
     body{background:#fff;color:#000}
     :root{--ink:#000;--dim:#444;--faint:#777;--line:#ddd;--gold:#8a6a1e;--silver:#555;--bronze:#7a5c33;--miss:#b32017;--box:#fff}
     .page{max-width:none;padding:0}

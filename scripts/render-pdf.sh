@@ -22,12 +22,30 @@ case $MIN in ''|*[!0-9]*) echo "render-pdf: min-pages must be a number, got '$MI
 CHROME=$(ls -d "$HOME"/.cache/ms-playwright/chromium-*/chrome-linux64/chrome 2>/dev/null | sort -V | tail -1)
 [ "$CHROME" ] || { echo "render-pdf: no Playwright chromium under ~/.cache/ms-playwright, install it first" >&2; exit 2; }
 
-# The route HTML sets its own page size. Without an @page rule the PDF comes
-# out Letter and loses the A5 phone shape, so warn.
-grep -qi '@page' "$HTML" || echo "render-pdf: warning: $HTML has no @page rule, the PDF will not be A5" >&2
+# The route HTML should carry its own @page rule. If it does not name a page
+# size, inject the A5 default into a temp copy so the PDF is always the right
+# shape. A Letter PDF on a phone is small type on a wrong shape, the same
+# class of silent failure as the one page PDF. The input file is never
+# modified.
+TMP=""
+trap 'rm -f "$TMP"' EXIT INT TERM
+SRC=$HTML
+SIZE_NOTE="page size from the input's own @page rule"
+# The rule may span lines, so awk over lowercased lines: once inside an
+# @page block, look for "size" before the block closes.
+if ! awk '{l=tolower($0)} l ~ /@page/{inp=1} inp && l ~ /size/{f=1} l ~ /}/{inp=0} END{exit f?0:1}' "$HTML"; then
+  SRC=$(mktemp /tmp/route-page-XXXXXX.html)
+  TMP=$SRC
+  if grep -qi '</head>' "$HTML"; then
+    sed "s|</head>|<style>@page { size: A5; margin: 13mm 12mm; }</style>\n</head>|i" "$HTML" > "$SRC"
+  else
+    { cat "$HTML"; printf '\n<style>@page { size: A5; margin: 13mm 12mm; }</style>\n'; } > "$SRC"
+  fi
+  SIZE_NOTE="default A5 supplied by render-pdf.sh"
+fi
 
 "$CHROME" --headless --disable-gpu --no-sandbox --no-pdf-header-footer \
-  --print-to-pdf="$PDF" "$HTML" 2>/dev/null
+  --print-to-pdf="$PDF" "$SRC" 2>/dev/null
 [ -s "$PDF" ] || { echo "render-pdf: chromium wrote no PDF at $PDF" >&2; exit 1; }
 
 count_pages() {
@@ -46,4 +64,4 @@ if [ "$PAGES" -lt "$MIN" ]; then
   echo "render-pdf: a one page PDF is the exact silent failure this script exists to catch. The route is broken, do not use this PDF." >&2
   exit 1
 fi
-echo "render-pdf: $PDF ($PAGES pages)"
+echo "render-pdf: $PDF ($PAGES pages, $SIZE_NOTE)"
