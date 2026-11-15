@@ -30,7 +30,7 @@ Kriday's currency for fastest is his own attention, not the clock. A long hands-
 | Optional content | kept | cut and listed as dropped | kept |
 | Content shortcuts | none | allowed, flagged | none |
 | DLC lists | no | no | yes, marked not platinum-required |
-| Claim sourcing | every risky claim sourced or flagged | best effort | every risky claim sourced or flagged |
+| Claim sourcing | every risky claim sourced or flagged | every risky claim sourced or flagged | every risky claim sourced or flagged |
 
 Modes do not change research depth. The research happens once and the modes only change the route built on it. A second mode inside the same run is a delta pass over the same research, measured at about 3 extra minutes and 8k output tokens on top of a 3.2M input route (ticket #4).
 
@@ -45,7 +45,7 @@ Modes do not change research depth. The research happens once and the modes only
 
 The position ask is mandatory on every run. The model researches the game's story and mode structure first, then asks where the player is, including whether the player broke the linear order. Two steps that can be done in either order get a "needs:" line and, where order matters, an "if you did Y first" note. Prerequisites adapt to what the player reports. The route never guesses a position and never silently assumes a fresh save.
 
-Season state is researched live at generation time instead of hardcoded. Kriday's instruction was to research Invasions and similar time-bound content as the model sees fit, so the spec states the requirement and leaves the method to generation. The PDF header prints the generation date, the season number and the days left. Every season-bound step carries its expiry.
+Season state is researched live at generation time instead of hardcoded. Kriday's instruction was to research Invasions and similar time-bound content as the model sees fit, so the spec states the requirement and leaves the method to generation. The PDF header prints the generation date and, when relevant and verified, the season number and days left. Season-bound steps carry verified expiry information; mark unknown details as unverified rather than guessing.
 
 A route tied to a live season has a shelf life. On Mortal Kombat 1 two trophies are season-bound (`Vanquished`, `The Mighty Have Fallen`), so an old PDF must show its age rather than look current.
 
@@ -57,10 +57,10 @@ The player can arrive with a trophy already lost, for example a Titan that never
 
 Measured on Mortal Kombat 1, 51 base trophies and 2 season-bound missables.
 
-- safe: pass 1 holds both season-bound trophies with their deadlines and the cost of missing them, pass 2 covers the remaining 49 with none missing, and no step relies on an unsourced claim.
+- safe: pass 1 holds both season-bound trophies with verified deadlines or explicit uncertainty, and the cost of missing them, pass 2 covers the remaining 49 with none missing, and no step relies on an unsourced claim.
 - fastest: all 51 covered, optional work named as dropped, mastery grind kept with both hour figures, cutscene skipping flagged.
 - completionist: 51 covered on the safe spine, DLC lists appended or an explicit "none exist", optional fast application stated when used.
-- every mode: starts from the confirmed position, prints the generation date and season state, marks expired or unobtainable trophies instead of listing them as doable.
+- every mode: starts from the confirmed position, prints the generation date and verified season state or marks it unknown, marks expired or unobtainable trophies instead of listing them as doable.
 
 ## Rejected options
 
