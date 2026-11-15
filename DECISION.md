@@ -17,7 +17,7 @@ One-shot document, no remembered state, nothing syncs back. Manual ticks only, p
 
 - Generation is position-aware: the model mandatorily asks "how far are you?" on every run, fresh games included. The answer maps to a route start.
 - Output is a remaining-route PDF covering what is still gettable. Already-dead missables get a "locked, gone for good" line at the top.
-- If a missable dies mid-run, the same harness conversation can generate a "from here" fragment PDF. The original stays untouched.
+- If a missable dies mid-run, a capable agent can generate a "from here" fragment PDF. The original stays untouched.
 
 ## Rejected options
 
