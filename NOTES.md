@@ -1,27 +1,19 @@
-# Ticket #4 notes: what powers the generation
+# Ticket #4 notes: historical generation measurements
+
+These are observations from a particular setup and date, not current product requirements or guarantees. The clarified [ADR 0002](docs/decisions/0002-generation-power.md) selects no agent, provider, credentials, sandbox flags or renderer. Credentials and source access may have changed.
 
 Working notes for issue #4 on kridaydave/platinum-anything. Branch `ticket/4-generation-power`. The decision built on top of these notes is [ADR 0002](docs/decisions/0002-generation-power.md).
 
 ## Settled context this ticket builds on
 
 - Issue #1 notes bind the ticket. PlayStation only, Kriday first, no accounts, AI does web search and text generation only, real results only.
-- Ticket #5 (ADR 0001, PR #7): v1 is a harness-generated, phone-readable PDF. Personal workflow. No app-managed key.
+- Ticket #5 originally assumed a personal harness-generated PDF. That assumption has since been clarified: v1 is an agent-independent prompt and PDF template.
 - Ticket #2 (committed on `ticket/2-trophy-map-shape`): ordered route line with guide depth, one-shot PDF, manual ticks, position-aware generation. The model asks "how far are you?" every run and emits a remaining-route PDF from that point. A mid-run death can produce a "from here" fragment PDF from the same conversation.
 - Ticket #3 (settled, still being posted by its owner): three modes ship, safe, fastest, completionist. One PDF can carry several modes, named at generation time. Mode is a required input next to the position answer. A re-run with a new position regenerates the document, it does not patch it. Shape is one spine plus per-mode deltas.
 
-## Credentials that actually exist on this machine
+## Credential context at the time
 
-Checked by looking, not by asking.
-
-| Credential | Where | Notes |
-| --- | --- | --- |
-| ChatGPT Plus, OAuth | `~/.codex/auth.json` | `OPENAI_API_KEY` is null, it is a subscription login. Codex CLI 0.169.0 installed. Account webbie.byte@gmail.com. |
-| DeepAI account | `T3_DEEPAI_TOKEN` and friends in the shell env | Plan `premium` per the telemetry. Drives this harness. |
-| Kilo, OAuth | `~/.local/share/kilo/auth.json` | Installed and authenticated. |
-| GitHub token | `~/.config/gh/hosts.yml`, keyring | Scope `repo`, `workflow`. |
-| `TOKENROUTER_API_KEY` | `~/.zshrc` line 3 | The only raw API-style key on the box. Nothing in any config points at it and no script references it. Unknown gateway, unusable until someone works out what it fronts. |
-
-Not present anywhere: Anthropic, OpenAI, Google or Gemini API keys, and every third party search key (Tavily, Exa, Serper, Brave, Perplexity, Firecrawl, Jina). So an API-backed v1 means account, card and key setup before anything runs.
+The measured setup used an existing subscription login; costs and credentials vary with the chosen agent. No account inventory is needed to use the product.
 
 ## Search and fetch that work today with no new key
 
@@ -57,10 +49,10 @@ Comparison point for the API route: the published prices are Anthropic web searc
 
 One generation run emits every mode the player names. Adding fastest and completionist to a route that already has safe, in a fresh pass, cost 340 s and $0.040 on luna, which is the same ballpark as the single-mode run at 574 s and $0.056. Adding the modes later, as a warm second turn inside the same session, cost an extra 177 s and $0.075 on luna because the whole cached context is sent again. One pass with all modes is the cheaper shape.
 
-## Operational facts for whatever tool wins
+## Observations from the measured setup
 
-- `codex exec` defaults to a read-only sandbox outside a trusted directory. Writes were rejected with "patch rejected: writing is blocked by read-only sandbox". The generating command needs `-s workspace-write` and `-c approval_policy="never"`.
-- Chromium cannot start inside the Codex sandbox. The agent burned several turns on retries and fell back to a Python renderer that produced a 1-page PDF. Rendering outside the sandbox with the Playwright chromium already on disk produced the real 13 to 14 page A5 PDFs. The generating command has to run the render where chromium can start, or the route silently ships as a bad PDF.
+- `codex exec` defaults to a read-only sandbox outside a trusted directory. Writes were rejected with "patch rejected: writing is blocked by read-only sandbox". That run used workspace-write permissions and a particular approval setting; other environments have different permission models.
+- Chromium cannot start inside the Codex sandbox. The agent burned several turns on retries and fell back to a Python renderer that produced a 1-page PDF. Rendering outside the sandbox with the Playwright chromium already on disk produced the real 13 to 14 page A5 PDFs. That particular renderer needed an environment where it could start. Inspect output for missing content regardless of renderer.
 - Playwright chromium is at `~/.cache/ms-playwright/chromium-1255/chrome-linux64/chrome`. Headless print to PDF works from a normal shell.
 - The MCP server in the Codex config fails auth on every run ("invalid_token" for the Vercel MCP). It is noise, but it pollutes every run's logs.
 

@@ -1,6 +1,6 @@
 # plat-anything v1 spec
 
-Status: all four decisions are in and the spec is buildable. [Issue #1](https://github.com/kridaydave/platinum-anything/issues/1) closes with this update; no slot below is still a question.
+Status: the v1 product direction is clarified as an agent-independent prompt and PDF template. The Mortal Kombat acceptance run remains to be performed; issue #1 is not closed by this document.
 
 ## Destination and settled constraints
 
@@ -46,17 +46,17 @@ The #4 measurement runs confirmed the #6 access picture on this machine: the Pow
 
 Four tickets have decided. Each decision lives in its issue comment and, for #3, #4, and #5, in an ADR on this branch.
 
-### V1 form: harness-generated PDF (#5, ADR 0001)
+### V1 form: agent-independent prompt and PDF template (#5, ADR 0001)
 
-V1 is a personal workflow. Kriday runs a coding-agent harness on his computer, the harness researches the game and produces a sourced, phone-readable PDF route, and he transfers the PDF to his phone. The PDF reads offline and he annotates it in his PDF reader as he plays. The v1 surface is the harness conversation itself: game and constraints in, PDF out. No account, no app-managed progress, no separate application API key.
+V1 supplies a reusable prompt and PDF template to any capable agent. The player provides the game, current position and modes; the agent researches and drafts a sourced route, and an available renderer produces a phone-readable PDF. Kriday transfers it to his phone and annotates it manually; the PDF works offline. No product account, hosting or app-managed progress is needed. The chosen agent may have its own costs, credentials and permissions.
 
-Rejected with reasons: a local web app adds a server for little benefit, a standalone CLI duplicates the harness interface, a deployed site adds hosting and multi-user work that belong to a later public effort. Route content and attribution can inform a public site later, but the harness session, its credentials, and manual transfer do not become a hosted service on their own.
+A local web app, standalone launcher and deployed site add infrastructure outside this personal workflow. Route content, source attribution and layout can inform a later site, subject to source rights; hosting, credential handling and progress storage would need separate decisions.
 
 ### Map shape and mid-playthrough behavior (#2)
 
 The player gets a phone-readable PDF shaped as an ordered route line with guide depth folded in: numbered steps from where the player is now to the platinum. Each step has a number, an empty tick square, the trophy name, a tier dot, and a one-line requirement. Dependency knowledge lives as tags on steps, not as a graph: `MISSABLE: run 1 only`, `needs step 09`. Each phase opens with a short prose block plus a source tag. The stats bar carries a "route skips" line stating what the run's mode left out, so a fast route can never masquerade as a completionist one.
 
-Mid-playthrough is one-shot and position-aware. Nothing remembers state and nothing syncs back; ticks are manual marks in the PDF reader or on paper. The model asks "how far are you?" on every run, fresh games included, and the answer produces a remaining-route PDF covering what is still gettable from that position. Dead missables get a "locked, gone for good" line at the top. If a missable dies mid-run, the same harness conversation can generate a short "from here" fragment PDF; the original stays untouched.
+Mid-playthrough is one-shot and position-aware. Nothing remembers state and nothing syncs back; ticks are manual marks in the PDF reader or on paper. The model asks "how far are you?" on every run, fresh games included, and the answer produces a remaining-route PDF covering what is still gettable from that position. Dead missables get a "locked, gone for good" line at the top. If a missable dies mid-run, an agent can generate a short "from here" fragment PDF; the original stays untouched.
 
 Rejected with reasons: a full dependency board cannot tell a player what to do tonight and does not survive a phone PDF, a static guide page alone is what PowerPyx already gives away free (its typography was folded into the winner), and remembered progress needs NPSSO import or stored progress input, both of which contradict the no-accounts v1 and manual annotations.
 
@@ -78,7 +78,7 @@ The position ask extends too. The model researches the game's story and mode str
 
 If a missable is already gone when the player arrives, for example a Titan that never spawned or a story missable already passed, the route marks it lost with the reason, states the wait (next season or next playthrough), and puts it in a separate "blocked until then" block that does not reorder the rest. It never claims the run is still clean.
 
-Season state is researched live at generation time instead of hardcoded, with the method left to generation. The PDF header prints the generation date, the season number, and the days left, and every season-bound step carries its expiry, so an old PDF shows its age rather than looking current.
+Season state is researched live at generation time instead of hardcoded, with the method left to generation. Where relevant and verified, the PDF header prints the generation date, season and days left, and season-bound steps carry their expiry. Mark unknown details as unverified rather than guessing; state when the route needs refreshing if known.
 
 Rejected with reasons: three independent full routes in one PDF (spine plus deltas is cheaper and phone-readable), dropping completionist (Kriday wants all three), a default mode when none is stated, one mode per PDF (overruled by Kriday after the first recommendation), auto re-planning on out-of-order play (in-place reordering is a different feature), modes changing research depth or source access, DLC treated as platinum-required, and defining modes by trophy coverage.
 
@@ -86,24 +86,16 @@ The decision record is [ADR 0003](docs/decisions/0003-route-modes.md).
 
 ### Generation power (#4, ADR 0002)
 
-v1 generates routes on Kriday's own machine with the Codex CLI, driving his ChatGPT Plus login. The backend is `codex exec` with `tools.web_search=true` on the Codex default model `gpt-6-luna`; Sol stays the fallback for routes that come back weak. Codex does the web search, fetches the guide pages, checks its own work, writes the route, and the PDF renders outside the Codex sandbox with Playwright chromium. No metered LLM API key is part of v1. Measured: a full 51-trophy route costs about $0.06 metered and takes 9.6 minutes, three modes in one pass cost the same as one, and out-of-pocket is $0 because the runs ride the Plus subscription. The real cost is plan quota, which peaked at 34% of the primary window over a week.
+The prompt and template work with any capable agent; no provider, model, launcher, account, key, browser or renderer is selected. The agent needs access to appropriate web research and text generation; PDF rendering is ordinary software. The user or agent supplies a suitable renderer, and reports missing capabilities or unverified facts honestly. The selected agent may have its own credentials, cost and permissions.
 
-Rejected with reasons: one API call with built-in search costs about ten times as much, needs a billed account that does not exist here, and works from snippets rather than the real guide page. A hybrid split adds a card, a key, and a second way to fail. Shipping the harness to gamers contradicts the no-hosting v1.
+The #4 runs in [NOTES.md](NOTES.md) are historical observations of one setup, not universal cost, latency, access or configuration guarantees. See [ADR 0002](docs/decisions/0002-generation-power.md).
 
-The decision record is [ADR 0002](docs/decisions/0002-generation-power.md); the measurements are in `NOTES.md` on `ticket/4-generation-power`.
+## Operational requirements
 
-## Operational requirements from the #4 measurement runs
-
-These are not preferences. Each one comes from a run that failed or cost extra without it, so the implementation has to follow them.
-
-- `codex exec` needs `-s workspace-write` and `-c approval_policy="never"`, plus `-c tools.web_search=true`. Without the sandbox flags, writes get rejected with "patch rejected: writing is blocked by read-only sandbox".
-- The PDF render runs outside the Codex sandbox, using the Playwright chromium already installed. Chromium cannot start inside the sandbox, and the fallback the agent then produces silently ships a one page PDF instead of the real 13 to 14 page one. A run that produces a one page PDF is a failed run, not a small route.
-- One generation run emits every named mode in a single cold pass. Adding modes later as a warm second turn re-sends the whole cached context and cost nearly double ($0.075 extra on luna versus $0.040 for all three modes in one pass).
-- The verification loop is mandatory: fetch the real guide pages, cross-check the trophy list, cite sources, and write "unverified" rather than inventing a fact.
-- Caps for any future metered backend: $1 per route and $5 per game. Every run records wall clock and token counts so this spec can state real spend instead of a guess.
-- Latency targets: a full route inside 15 minutes, a "from here" fragment inside 3. Measured runs took 5.7 to 9.6 minutes for full routes.
-- Routes have a season shelf life. Mortal Kombat 1 (2023) has two season-sensitive trophies, Vanquished and The Mighty Have Fallen, tied to the Invasions season. Season state is researched live at generation time, not hardcoded, and the PDF header prints the generation date, the season number, and the days left. A route for that game must be regenerated when the season turns over, and the measured route put the two season-sensitive trophies first while flagging that event availability can only be verified on the console.
-- The prompt and the render command are the product now, so they live as files in the repo, not in chat history.
+- Research accessible guide pages, cross-check trophy information, cite sources, respect access and reuse rights, and mark unknown claims unverified. Do not bypass blocked sources.
+- Emit the requested modes together in the chosen route structure. Research seasonal state when relevant; do not invent dates or availability.
+- Render the completed template to PDF using an available tool. Inspect all pages against the source for legibility, completeness, clipping and sensible breaks. An unexpectedly short PDF warrants investigation; a single page is not automatically invalid.
+- Report real limitations, elapsed time, usage or spend when available; no provider-independent cost or latency guarantee is assumed. The prompt and PDF template are the reusable product; there is no agent launcher.
 
 ## Decision tree
 
@@ -119,10 +111,10 @@ Settled: PlayStation game -> LLM-generated trophy map -> platinum route
 |   +-- safe, fastest, completionist; mode required, no default; spine plus deltas
 |
 +-- #4 Generation power [SETTLED]
-|   +-- local Codex harness, no metered key, measured cost and latency
+|   +-- agent-independent prompt; research and rendering capabilities required
 |
 +-- #5 V1 form [SETTLED]
-    +-- harness conversation in, phone-readable PDF out
+    +-- prompt and template in, phone-readable PDF out
 
 #3 -> mode definitions, per-mode route changes, and spine-plus-deltas emission
 #2 + #4 -> position-aware generation (settled: mandatory position question, remaining-route PDF)
@@ -136,9 +128,9 @@ Settled: PlayStation game -> LLM-generated trophy map -> platinum route
 | Map shape | [#2](https://github.com/kridaydave/platinum-anything/issues/2) | SETTLED | Ordered route line with guide depth, one-shot position-aware PDF, manual ticks. See the decision comment on #2. |
 | Mid-playthrough behavior | #2 | SETTLED | One-shot document, no remembered state, mandatory position question every run, remaining-route PDF, "from here" fragments from the same conversation. |
 | Route modes | [#3](https://github.com/kridaydave/platinum-anything/issues/3) | SETTLED | safe, fastest, completionist. Mode is a required input with no default, zero missables is a hard rule in every mode, and the modes are defined by pass structure and cutting policy, not trophy coverage. One PDF carries several modes as a spine plus per-step deltas. See the decision comment on #3 and ADR 0003. |
-| Generation power | [#4](https://github.com/kridaydave/platinum-anything/issues/4) | SETTLED | Local Codex harness on the ChatGPT Plus login, no metered key. Backend, flags, render location, one-pass modes, verification loop, caps, and latency are in the decision comment and ADR 0002. |
-| Route spend | #4, folded into #1 | SETTLED | Measured: $0.04 to $0.06 metered per route on luna, $0 out of pocket on the Plus plan. If a metered backend is ever used, the ceiling is $1 per route and $5 per game. Every run records wall clock and token counts. |
-| V1 form | [#5](https://github.com/kridaydave/platinum-anything/issues/5) | SETTLED | Harness-generated PDF, harness conversation is the surface, manual annotations, no accounts or hosting. See the decision comment on #5 and ADR 0001. |
+| Generation power | [#4](https://github.com/kridaydave/platinum-anything/issues/4) | SETTLED | Any capable agent; credentials, cost and runtime depend on the chosen setup. See the clarified ADR 0002. |
+| Route spend | #4, folded into #1 | SETTLED | Historical measurements are setup-specific; future spend depends on the chosen agent and is reported when available. |
+| V1 form | [#5](https://github.com/kridaydave/platinum-anything/issues/5) | SETTLED | Reusable agent-independent prompt and PDF template; manual annotations, no product accounts or hosting. See the decision comment on #5 and ADR 0001. |
 
 ## End-to-end contract
 
@@ -146,7 +138,7 @@ These slots belong to #1's integration work. They follow the owning tickets rath
 
 ### Input contract (settled for v1)
 
-The player supplies two things, both through the harness conversation:
+The player supplies three inputs to the chosen agent:
 
 - The game, identified by name. PlayStation only.
 - The position: an answer to the mandatory "how far are you?" question, asked on every run including fresh games. "Nothing, starting fresh" is a valid answer and starts the route at step 1.
@@ -156,7 +148,7 @@ PSN import is not part of v1 and no progress state is stored.
 
 ### Generation contract (settled for v1)
 
-A v1 run is Codex CLI on Kriday's machine, riding the ChatGPT Plus login, on `gpt-6-luna` with Sol as the fallback for weak routes, `tools.web_search=true`, and the workspace-write sandbox flags from the operational section. The run fetches real guide pages (PowerPyx confirmed reachable; PlayStationTrophies and PSNProfiles confirmed 403), runs the mandatory verification loop, and writes the route. The PDF render runs outside the Codex sandbox with Playwright chromium. One run emits every named mode. The run records wall clock and token counts. Full detail and rationale live in ADR 0002.
+Provide the prompt, template and inputs to a capable agent. It researches accessible sources, verifies trophy information, identifies uncertain claims, and writes all requested modes into the route. Render with an available PDF tool and inspect the result. Agent selection, access, credentials, model and rendering method are left to the player; missing capabilities must be reported.
 
 ### Output contract (settled for v1)
 
@@ -168,7 +160,7 @@ The route also handles two arrival states #3 settled: a missable already lost ge
 
 ### Delivery contract (settled for v1)
 
-The harness conversation produces the PDF file. Kriday transfers it to his phone and annotates it in his PDF reader. The PDF reads offline; only generation needs web access. Annotations are manual and never sync back. Revisiting the route means running generation again with a new position, which regenerates the document from that point rather than patching it.
+The agent and an available renderer produce the PDF file. Kriday transfers it to his phone and annotates it in his PDF reader. The PDF reads offline; only generation needs web access. Annotations are manual and never sync back. Revisiting the route means running generation again with a new position, which regenerates the document from that point rather than patching it.
 
 ### Acceptance procedure: the Mortal Kombat run
 
@@ -180,17 +172,16 @@ A v1 acceptance run must do all of this, with actual reported results, not claim
 2. Fetch the real PowerPyx MK1 guide, cross-check the 51-trophy list against it, and cite sources. Facts the sources cannot confirm get marked "unverified".
 3. Put the two season-sensitive trophies, Vanquished and The Mighty Have Fallen, where the route handles them and flag that their availability can only be verified on the console. State the season shelf life in the document so the route says when it needs regenerating.
 4. Emit all three modes in one pass and check each against its acceptance bar:
-   - safe: pass 1 holds Vanquished and The Mighty Have Fallen with their deadlines and the cost of missing them, pass 2 covers the remaining 49 trophies, and no step relies on an unsourced claim.
+   - safe: pass 1 holds Vanquished and The Mighty Have Fallen with verified deadlines or explicit uncertainty, and the cost of missing them, pass 2 covers the remaining 49 trophies, and no step relies on an unsourced claim.
    - fastest: all 51 covered, optional work named as dropped, the mastery grind kept with both the 10-hour and 50-hour figures, and cutscene skipping flagged.
    - completionist: 51 on the safe spine, DLC lists appended or an explicit "none exist", and the optional fast application stated when used.
-   - every mode: starts from the confirmed position and prints the generation date and season state.
-5. Render a real multi-page PDF outside the sandbox. A one page PDF fails acceptance.
-6. Finish the full route inside 15 minutes and any "from here" fragment inside 3.
-7. Record wall clock and token counts and report real spend against the $1 per route / $5 per game caps.
-8. Report gaps from the run honestly. A silent fallback is a failure.
+   - every mode: starts from the confirmed position and prints the generation date and verified season state or marks it unknown.
+5. Render the completed template to PDF and inspect every page against the source for completeness, legibility and clipping. Investigate an unexpectedly short PDF.
+6. Record elapsed time, token counts and spend when available, identifying the agent and any limits on the measurements.
+7. Report missing capabilities, unknown dates and other gaps honestly. A silent fallback is a failure.
 
 ## Folding in decisions
 
 #2, #3, #4, and #5 are folded in above, with links to their decision comments and ADRs. The #3 ADR arrived on `ticket/3-route-modes` named 0002 and was renumbered to 0003 here because this branch already had ADR 0002 from #4.
 
-All four decisions fit each other and the settled #1 constraints, so nothing went back to an owning ticket. The spec is buildable without further product decisions and issue #1 closes with this update. PR #8 carries it.
+The agent-independent clarification supersedes earlier provider-specific requirements in #4 and #5. PR #8 carries the integrated spec; the first real acceptance run remains outstanding.
