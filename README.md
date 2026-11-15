@@ -2,6 +2,6 @@
 
 # plat-anything
 
-Give it a PlayStation game, your position, and modes. Get back a phone-readable PDF route to the platinum. See [SETUP.md](SETUP.md) for how to run one.
+Use a capable agent to turn a PlayStation game, your position, and chosen modes into a phone-readable platinum route PDF. The reusable [prompt](prompts/route.md) and [template](templates/route.html) work independently of any particular agent. See [SETUP.md](SETUP.md) for usage and verification.
 
 Created in [T3 Code](https://t3.codes).

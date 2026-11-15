@@ -1,15 +1,14 @@
 <!--
-  plat-anything route generation prompt. This file is the product (ADR 0002).
-  scripts/generate.sh fills the three placeholder values from its arguments and
-  sends a copy into the run directory. Keep one game's facts out of here;
-  this has to work for any PlayStation game.
+  Reusable prompt. Fill in the inputs or ask the player for them.
+  Keep game-specific facts out of this file.
 -->
 
 # Platinum route generation
 
 You generate a platinum trophy route for a PlayStation game. The output is a
-phone-readable HTML document in the working directory that later gets printed
-to PDF and read on a phone while the game is running.
+phone-readable PDF, using the accompanying HTML template as a starting point.
+If you cannot produce or render files, explain what is missing and provide the
+completed HTML for the player to render; never claim a PDF exists when it does not.
 
 ## Input
 
@@ -17,9 +16,9 @@ to PDF and read on a phone while the game is running.
 - Position: {{POSITION}}
 - Modes: {{MODES}}
 
-These three come from the player. Mode is a required input with no default.
-If Modes is empty or holds anything but safe, fastest, or completionist,
-stop and say what is missing. Never pick a mode for the player.
+These three come from the player. Ask for any missing input, including mode.
+Accept one or more of safe, fastest, and completionist; never pick a mode
+for the player. If an input remains unresolved, stop and explain what is missing.
 
 ## How to work
 
@@ -36,8 +35,7 @@ stop and say what is missing. Never pick a mode for the player.
    structure, stop and ask a plain follow-up question instead of writing
    the route. Never guess a position. Never silently assume a fresh save.
 3. Build the route for every named mode in this one run. Never leave a mode
-   for a second pass. A warm second turn resends the whole context and
-   costs nearly double.
+   for a second pass.
 4. Verify before writing. Cross-check the trophy list against the guide
    pages you fetched. Put a source tag next to every phase and every risky
    claim. Where a fact cannot be confirmed, write "unverified" next to it.
@@ -72,9 +70,9 @@ Hard rules that hold in every mode:
 - The research happens once. The modes change only the route built on it,
   never the research depth or the source access.
 - Season state and other live content is researched at generation time,
-  never hardcoded. The header prints the generation date, the current
-  season number, and days left. Every season-bound step carries its expiry.
-  Add a shelf life line saying when this route needs regenerating.
+  never hardcoded. Where applicable and verifiable, print the season, days
+  left and expiry; otherwise mark them unknown or not applicable. Give the
+  route a shelf life where relevant without inventing a deadline.
 - If the player broke the linear story order, flag the break in the
   document and tell them to regenerate from their new position. Never
   re-plan in place.
@@ -98,18 +96,17 @@ route. Never claim the run is still clean.
 
 ## The document
 
-Write the finished route to route.html in the working directory. The render
-step turns it into route.pdf, so the HTML must carry its own print rules.
-
-mockups/a-route-line.html in the working directory holds the exact shape
-and CSS. Follow it. Its print section already has the A5 page rule, the
-phase breaks, and the print palette.
+Use templates/route.html as the starting point, replacing all example
+placeholders and duplicating phases and steps as needed. Preserve semantic
+headings, readable contrast, text labels and the A5 print rules. Save the
+completed HTML and render it to PDF when your environment permits. See
+SETUP.md for agent-independent rendering and verification guidance.
 
 - One phase per printed page. A5, phone readable: big type, tap friendly
-  spacing, readable as a narrow column. Dark ink on black on screen, and
+  spacing, readable as a narrow column. Light ink on black on screen, and
   print CSS flipping to black on white.
 - No em dashes anywhere in the document.
-- Header: game name, generation date, season number, days left.
+- Header: game name, generation date, and applicable season information.
 - Stats bar: route steps, trophies covered, missable count, playthroughs,
   total time estimate, and a "Route skips:" line stating what this run's
   mode left out, so a fast route can never pose as a completionist one.

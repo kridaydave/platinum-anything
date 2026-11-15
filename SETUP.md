@@ -1,87 +1,18 @@
-# Setup and first run
+# Use the route prompt and template
 
-plat-anything v1 is two files and one command. `prompts/route.md` is the
-generation prompt, `scripts/generate.sh` is the command. ADR 0002 explains
-why they live as files in the repo.
+The product is a reusable prompt and an HTML template for a phone-readable PDF. Use them with any agent that can research the web, read the template, and produce files. No launcher or particular agent is required. Provider access, credentials, cost, capabilities and permission settings depend on your chosen agent.
 
-## What you need
+1. Give the agent [prompts/route.md](prompts/route.md) and [templates/route.html](templates/route.html), by attaching them, sharing their contents, or pointing to their paths if it can read the repository.
+2. Supply the PlayStation game, your current position (including any out-of-order progress), and one or more modes: safe, fastest, completionist. For example: `Mortal Kombat 1 (2023); nothing, starting fresh; safe, fastest, completionist`.
+3. Ask the agent to research and verify the route, replace the template placeholders, and deliver the completed HTML and PDF. If it cannot fetch a source or create the PDF, it should say so and identify any unverified facts rather than inventing results.
+4. Review the sources and the generated PDF, transfer it to your phone, and annotate it in your PDF reader. Annotations stay in that reader; they do not sync back into the prompt or agent.
 
-- The Codex CLI, logged in on the ChatGPT Plus account. `~/.codex/auth.json`
-  holds that login. Check with `codex login status`.
-- The Playwright chromium on this machine, under `~/.cache/ms-playwright/`.
-  The render script finds the newest one by itself.
-- `pdfinfo` from poppler-utils, for the page count check. The script falls
-  back to a grep count without it.
+## Rendering and checking
 
-Nothing else. No API key, no card, no database.
+The self-contained template uses A5 print CSS, dark on-screen styling and a light print palette. An agent with a PDF renderer can print the completed HTML using its available tools; alternatively open it in a browser and use Print → Save as PDF, enabling background graphics only if needed. Preserve A5 and avoid browser headers and footers where possible. No specific browser, operating system, agent or renderer is required.
 
-## Run your Mortal Kombat route
+Open the resulting PDF and inspect every page: confirm that text is legible on a phone, content and sources are present, no steps are clipped or missing, and page breaks make sense. Compare it against the HTML. A page count alone cannot establish correctness; a short route may legitimately fit on one page, but an unexpectedly short PDF requires investigation. Check that placeholders are gone, claims are sourced or marked unverified, mode differences and current position are represented, and seasonal deadlines are verified or marked unknown. The static template is a starting point, not a real route or proof that a generation run works.
 
-```sh
-scripts/generate.sh "Mortal Kombat 1 (2023)" "nothing, starting fresh" "safe,fastest,completionist"
-```
+## Product clarification and related decisions
 
-Replace the three arguments with your real answers:
-
-1. The game. PlayStation only.
-2. Where you are. "nothing, starting fresh" is a valid answer. If you are
-   mid-run or played the story out of order, say so in plain words.
-3. The modes. safe, fastest, completionist, comma separated. No default:
-   leaving this empty fails the run on purpose, because a route that
-   silently skips content is worse than a slow one.
-
-When it finishes it prints the PDF path, the wall clock, and the token
-counts. Everything the run produced sits in `runs/<date>-<game>/`:
-`prompt.txt` (exactly what was sent), `codex.jsonl`, `route.html`,
-`route.pdf`, and codex's final message. `runs/` is gitignored.
-
-## Verification status
-
-Honest state, as of 2026-11-14:
-
-- The render path is verified on this machine. `scripts/render-pdf.sh` was
-  run against the route mockup from ticket 2 and produced a real 6 page A5
-  PDF. The one page failure case also verified: the script exits non-zero
-  with a loud message instead of shipping a broken PDF. If the input HTML
-  has no @page rule naming a size, the script injects a default A5 rule
-  into a temp copy before rendering, so the PDF cannot silently come out
-  Letter shaped.
-- The full generation path is NOT verified end to end. The ChatGPT Plus
-  login hit its usage limit on 2026-11-14 and resets Nov 15th, 2026
-  1:43 AM. `scripts/generate.sh` was exercised with a stub codex that
-  follows the same contract, so the plumbing (prompt substitution, run
-  directory, failure handling, render, printed wall clock and tokens)
-  works, but no real route has come out of it yet.
-
-Treat your first MK1 run as the acceptance run. If it fails, the run
-directory holds everything needed to see why.
-
-## Acceptance checklist
-
-From SPEC.md. A run passes when all of this is true with actual reported
-results, not claims:
-
-1. The position question was asked, including whether the linear story
-   order was broken, and "nothing, starting fresh" was accepted.
-2. The real PowerPyx MK1 guide was fetched, the 51 trophy list was
-   cross-checked against it, sources are cited. Facts the sources could
-   not confirm are marked "unverified".
-3. The two season-sensitive trophies, Vanquished and The Mighty Have
-   Fallen, sit where the route handles them, flagged as console-only
-   verification. The document states the season shelf life.
-4. All three modes came out of one pass:
-   - safe: pass 1 holds both season trophies with deadlines and the cost
-     of missing them, pass 2 covers the other 49, no unsourced claims.
-   - fastest: all 51 covered, optional work named as dropped, mastery
-     grind kept with both the 10 hour and 50 hour figures, cutscene
-     skipping flagged.
-   - completionist: 51 on the safe spine, DLC lists appended or an
-     explicit "none exist", the optional fast application stated.
-   - every mode starts from the confirmed position and prints the
-     generation date and season state.
-5. The PDF is a real multi-page A5 document rendered outside the sandbox.
-   A one page PDF fails acceptance.
-6. The full route took 15 minutes or less.
-7. Wall clock and token counts were recorded and reported.
-8. Gaps from the run were reported honestly. A silent fallback is a
-   failure.
+The reusable prompt and template replace the earlier assumption that v1 requires a specific coding-agent harness, account, model, sandbox flags or launcher. An agent may use its own tools or credentials, and some may need an API key. This clarification supersedes provider-specific product requirements in the earlier #4 decision and the proposed spec in PR #8; their measurements remain historical observations, not guarantees. Route structure and mode decisions in PRs #9 and #11 overlap with the prompt and template and should be reconciled as those PRs land.
