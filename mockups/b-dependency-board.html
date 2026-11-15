@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction B - dependency board</title>
+<!--
+  plat-anything mockup, direction B of 3: "the map is a graph".
+
+  Assumptions:
+  - This is the visual dependency map option from issue #2, shown honestly: same
+    MK-style sample data as directions A and C, drawn as nodes and edges.
+  - Static SVG, no animation. Screen shape only, because a node graph with
+    crossing edges falls apart when printed to phone PDF. That limit is part of
+    what Kriday is choosing between, not a defect of this draft.
+  Anchor (best-designer lens): arcade move-list and a tournament bracket wall.
+  The player already reads structured diagrams like this in fighting games.
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000; --ink:#fff; --dim:#a1a1aa; --faint:#52525b; --edge:#3f3f46;
+    --gold:#e0a832; --silver:#c9c9c9; --bronze:#b08d57; --miss:#ff433d; --plat:#fff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .page{max-width:1180px;margin:0 auto;padding:48px 24px 80px}
+
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
+  h1{font-size:clamp(30px,5vw,48px);font-weight:800;letter-spacing:-.02em;margin:10px 0 8px}
+  .sub{color:var(--dim);font-size:14px;line-height:1.6;max-width:60ch}
+
+  .board{margin-top:36px;border:1px solid #262626;overflow-x:auto}
+  .board svg{display:block;min-width:980px}
+
+  .legend{display:flex;flex-wrap:wrap;gap:16px;padding:12px 2px;font-size:12px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;vertical-align:-1px;margin-right:6px}
+  .g{background:var(--gold)} .s{background:var(--silver)} .b{background:var(--bronze)} .m{background:var(--miss)}
+
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:#262626;border:1px solid #262626;margin-top:28px}
+  .col{background:#000;padding:16px 14px}
+  .col h3{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+  .col p{font-size:12.5px;color:var(--dim);line-height:1.55}
+
+  .verdict{margin-top:44px;border:1px solid var(--edge);padding:20px 22px;max-width:72ch}
+  .verdict .kicker{margin-bottom:8px}
+  .verdict p{font-size:14px;line-height:1.65;color:var(--dim)}
+  .verdict b{color:var(--ink)}
+  .verdict .no{color:var(--miss)}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="kicker">plat-anything / direction B of 3 / sample data, MK-style</div>
+  <h1>Trophy dependency board</h1>
+  <p class="sub">Every trophy is a node, every requirement is an edge. Read the numbers left to right: that is the same route order as direction A. The graph answers "what blocks what" at a glance. The price is on the page too: long edges, crossings, and a width a phone PDF cannot hold.</p>
+
+  <div class="legend">
+    <span><i class="dot g"></i>gold</span>
+    <span><i class="dot s"></i>silver</span>
+    <span><i class="dot b"></i>bronze</span>
+    <span><i class="dot m"></i>missable outline</span>
+    <span>numbered node = route order</span>
+  </div>
+
+  <div class="board">
+  <svg viewBox="0 0 1180 560" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Trophy dependency graph, five columns of nodes with dependency edges">
+    <!-- column frames -->
+    <g font-family="JetBrains Mono, monospace" font-size="11" fill="#a1a1aa" letter-spacing="2">
+      <text x="80" y="40">STORY</text>
+      <text x="320" y="40">KRYPT</text>
+      <text x="560" y="40">TOWERS</text>
+      <text x="800" y="40">FATALITIES</text>
+      <text x="1010" y="40">GRIND + PLAT</text>
+    </g>
+    <g stroke="#262626">
+      <line x1="270" y1="50" x2="270" y2="530"/>
+      <line x1="510" y1="50" x2="510" y2="530"/>
+      <line x1="750" y1="50" x2="750" y2="530"/>
+      <line x1="990" y1="50" x2="990" y2="530"/>
+    </g>
+
+    <!-- edges drawn first so nodes sit on top -->
+    <g fill="none" stroke="var(--edge)" stroke-width="1.5">
+      <path d="M 205 120 C 260 120, 300 210, 345 210"/>            <!-- 2 -> 9 -->
+      <path d="M 345 210 C 420 210, 470 150, 545 150"/>            <!-- 9 -> 13 -->
+      <path d="M 345 300 C 460 300, 460 260, 545 260"/>            <!-- 10 -> 14 -->
+      <path d="M 545 260 C 640 260, 660 320, 745 320"/>            <!-- 14 -> 16 -->
+      <path d="M 205 180 C 300 180, 340 390, 345 390"/>            <!-- 4 -> 11 -->
+      <path d="M 545 320 C 700 320, 760 400, 785 400"/>            <!-- 14 -> 17 -->
+      <path d="M 205 240 C 400 240, 600 240, 785 240"/>            <!-- 5 -> 15 long edge -->
+      <path d="M 785 240 C 880 240, 940 150, 1035 150"/>           <!-- 15 -> 19 -->
+      <path d="M 205 300 C 350 300, 700 300, 1035 300"/>           <!-- 6 -> 20 longest edge -->
+      <path d="M 345 390 C 500 390, 900 390, 1035 390"/>           <!-- 11 -> 21 -->
+      <path d="M 785 400 C 900 400, 980 430, 1035 430"/>           <!-- 17 -> 21 -->
+      <path d="M 1035 150 C 1090 150, 1100 480, 1050 500"/>        <!-- 19 -> 22 -->
+      <path d="M 1035 300 C 1100 300, 1100 480, 1050 500"/>        <!-- 20 -> 22 -->
+      <path d="M 1035 430 C 1090 430, 1080 490, 1050 500"/>        <!-- 21 -> 22 -->
+    </g>
+
+    <!-- nodes: x centers at 135/385/625/855/1040 -->
+    <g font-family="Inter, sans-serif">
+      <!-- STORY column -->
+      <g transform="translate(135,80)">
+        <rect x="-70" y="-14" width="140" height="28" fill="#111" stroke="#b08d57"/><circle cx="-56" r="4" cy="0" fill="#b08d57"/><text x="-42" y="4" fill="#fff" font-size="12">01 Blood Sport</text>
+      </g>
+      <g transform="translate(135,140)">
+        <rect x="-70" y="-14" width="140" height="28" fill="#111" stroke="#b08d57"/><circle cx="-56" r="4" cy="0" fill="#b08d57"/><text x="-42" y="4" fill="#fff" font-size="12">02 Ten-Piece</text>
+      </g>
+      <g transform="translate(135,200)">
+        <rect x="-70" y="-14" width="140" height="28" fill="#111" stroke="#e0a832"/><rect x="-58" y="-10" width="9" height="9" fill="none" stroke="#ff433d" stroke-width="1.5"/><text x="-42" y="4" fill="#fff" font-size="12">04 Merciless</text>
+      </g>
+      <g transform="translate(135,260)">
+        <rect x="-70" y="-14" width="140" height="28" fill="#111" stroke="#e0a832"/><rect x="-58" y="-10" width="9" height="9" fill="none" stroke="#ff433d" stroke-width="1.5"/><text x="-42" y="4" fill="#fff" font-size="12">06 No Flukes</text>
+      </g>
+      <g transform="translate(135,320)">
+        <rect x="-70" y="-14" width="140" height="28" fill="#111" stroke="#b08d57"/><text x="-46" y="4" fill="#fff" font-size="12">08 Story done</text>
+      </g>
+
+      <!-- KRYPT column -->
+      <g transform="translate(385,210)">
+        <rect x="-60" y="-14" width="120" height="28" fill="#111" stroke="#b08d57"/><text x="-40" y="4" fill="#fff" font-size="12">09 Grave Robber</text>
+      </g>
+      <g transform="translate(385,300)">
+        <rect x="-60" y="-14" width="120" height="28" fill="#111" stroke="#e0a832"/><text x="-40" y="4" fill="#fff" font-size="12">10 Krypt Keeper</text>
+      </g>
+      <g transform="translate(385,390)">
+        <rect x="-60" y="-14" width="120" height="28" fill="#111" stroke="#b08d57"/><text x="-40" y="4" fill="#fff" font-size="12">11 Gear Head</text>
+      </g>
+
+      <!-- TOWERS column -->
+      <g transform="translate(625,150)">
+        <rect x="-60" y="-14" width="120" height="28" fill="#111" stroke="#b08d57"/><text x="-40" y="4" fill="#fff" font-size="12">13 First Fatality</text>
+      </g>
+      <g transform="translate(625,260)">
+        <rect x="-60" y="-14" width="120" height="28" fill="#111" stroke="#c9c9c9"/><text x="-40" y="4" fill="#fff" font-size="12">14 Fatality x10</text>
+      </g>
+      <g transform="translate(625,320)">
+        <rect x="-60" y="-14" width="120" height="28" fill="#111" stroke="#c9c9c9"/><text x="-40" y="4" fill="#fff" font-size="12">16 Tower Novice</text>
+      </g>
+
+      <!-- FATALITIES column -->
+      <g transform="translate(855,240)">
+        <rect x="-60" y="-14" width="120" height="28" fill="#111" stroke="#e0a832"/><rect x="-48" y="-10" width="9" height="9" fill="none" stroke="#ff433d" stroke-width="1.5"/><text x="-32" y="4" fill="#fff" font-size="12">15 Tower Time</text>
+      </g>
+      <g transform="translate(855,400)">
+        <rect x="-60" y="-14" width="120" height="28" fill="#111" stroke="#c9c9c9"/><text x="-40" y="4" fill="#fff" font-size="12">17 All Fatalities</text>
+      </g>
+
+      <!-- GRIND column -->
+      <g transform="translate(1075,150)">
+        <rect x="-60" y="-14" width="120" height="28" fill="#111" stroke="#b08d57"/><text x="-40" y="4" fill="#fff" font-size="12">19 Krowd x50</text>
+      </g>
+      <g transform="translate(1075,300)">
+        <rect x="-60" y="-14" width="120" height="28" fill="#111" stroke="#c9c9c9"/><text x="-40" y="4" fill="#fff" font-size="12">20 Champion</text>
+      </g>
+      <g transform="translate(1075,430)">
+        <rect x="-60" y="-14" width="120" height="28" fill="#111" stroke="#c9c9c9"/><text x="-40" y="4" fill="#fff" font-size="12">21 Kombo King</text>
+      </g>
+      <g transform="translate(1075,500)">
+        <rect x="-60" y="-14" width="120" height="28" fill="#fff" stroke="#fff"/><text x="-34" y="4" fill="#000" font-weight="700" font-size="12">22 ELDER GOD</text>
+      </g>
+    </g>
+  </svg>
+  </div>
+
+  <div class="cols">
+    <div class="col"><h3>What it gives you</h3><p>You see the whole run in one screen. Fatality trophies clearly hang off the Krypt, and the two story run locks stand out before you press start.</p></div>
+    <div class="col"><h3>What it costs</h3><p>Two edges cross no matter how you lay this out. That gets worse with real 50-trophy lists, where v1 lives.</p></div>
+    <div class="col"><h3>What it cannot do</h3><p>A graph does not tell you what to do at 9pm tonight. You still read it against an order that lives somewhere else, usually in the guide text.</p></div>
+    <div class="col"><h3>Print verdict</h3><p>This shape does not survive A4 phone reading. Edges under 1px column width become noise. It would ship as a screen-only extra or not at all.</p></div>
+  </div>
+
+  <div class="verdict">
+    <div class="kicker">the trade, stated plainly</div>
+    <p><b>The graph is a great answer to a question the PDF never asks.</b> Direction A keeps dependency knowledge as tags on steps, which is where a player standing in a menu can use it. If Kriday still wants the graph after this page, the honest version is a small per-chapter diagram in the PDF appendix, not one whole-game board.</p>
+  </div>
+
+</div>
+</body>
+</html>
