@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Platinum route template</title>
+<style>
+  :root { color-scheme: dark; font-family: system-ui, sans-serif; line-height: 1.5; }
+  body { margin: 0 auto; max-width: 42rem; padding: 1.25rem; background: #000; color: #fff; }
+  h1, h2 { line-height: 1.2; } a { color: #9ed0ff; overflow-wrap: anywhere; }
+  .stats { border: 1px solid #aaa; padding: .75rem; }
+  .phase { margin-top: 2rem; } .step { break-inside: avoid; margin: 1rem 0; }
+  .tick { display: inline-block; width: 1em; height: 1em; border: 2px solid currentColor; vertical-align: middle; margin-right: .5em; }
+  .tag { font-weight: bold; } .placeholder { color: #ddd; }
+  @media print {
+    @page { size: A5; margin: 13mm 12mm; }
+    :root { color-scheme: light; } body { background: #fff; color: #000; padding: 0; }
+    a { color: #000; } .placeholder { color: #333; } .phase + .phase { break-before: page; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <p>plat-anything / route template</p>
+  <h1>[Game title] platinum route</h1>
+  <p class="placeholder">[Generation date; position; requested modes and definitions; applicable season and expiry or uncertainty]</p>
+  <p class="stats">[Steps; trophies covered; missables; playthroughs; estimated time; route skips]</p>
+</header>
+<main>
+  <section class="phase" aria-labelledby="phase-1">
+    <h2 id="phase-1">[Phase 1 title]</h2>
+    <p>[Phase overview and source reference]</p>
+    <ol>
+      <li class="step"><span class="tick" aria-label="Not completed"></span><strong>[Trophy name]</strong> <span>[tier]</span><br>
+        [Requirement and action] <span class="tag">[Missable warning or prerequisite, if applicable]</span><br>
+        [Mode delta, source and uncertainty, if applicable]
+      </li>
+    </ol>
+  </section>
+  <section aria-labelledby="blocked"><h2 id="blocked">Blocked or lost trophies</h2><p>[Details, or state none known]</p></section>
+  <section aria-labelledby="sources"><h2 id="sources">Sources</h2><p>[Source titles and links; identify unverified claims]</p></section>
+</main>
+</body>
+</html>
