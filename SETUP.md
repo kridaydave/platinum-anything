@@ -15,4 +15,4 @@ Open the resulting PDF and inspect every page: confirm that text is legible on a
 
 ## Product clarification and related decisions
 
-The reusable prompt and template replace the earlier assumption that v1 requires a specific coding-agent harness, account, model, sandbox flags or launcher. An agent may use its own tools or credentials, and some may need an API key. This clarification supersedes provider-specific product requirements in the earlier #4 decision and the proposed spec in PR #8; their measurements remain historical observations, not guarantees. Route structure and mode decisions in PRs #9 and #11 overlap with the prompt and template and should be reconciled as those PRs land.
+The reusable prompt and template replace the earlier assumption that v1 requires a specific coding-agent harness, account, model, sandbox flags or launcher. An agent may use its own tools or credentials, and some may need an API key. The clarified decisions and spec reflect this direction; earlier measurements remain historical observations, not guarantees. Route shape and mode decisions inform the prompt and template.

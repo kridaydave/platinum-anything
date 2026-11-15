@@ -59,9 +59,10 @@ hands-off hours, so a long hands-off method can win over a shorter
 thumbs-on one. Everything optional is cut and named in a dropped list.
 Content shortcuts are allowed but flagged on the step that uses them.
 
-**completionist** uses the spine of the first mode named for the main list
-and appends DLC trophy lists, marked never platinum-required. It may
-optionally apply fast to main plus DLC, and says so when it does.
+**completionist** alone uses the safe spine; when combined with other modes,
+it uses the first named mode as the spine. It appends DLC trophy lists,
+marked never platinum-required. It may optionally apply fast to main plus
+DLC, and says so when it does.
 
 Hard rules that hold in every mode:
 
@@ -77,8 +78,8 @@ Hard rules that hold in every mode:
   document and tell them to regenerate from their new position. Never
   re-plan in place.
 - When the game has no missables, safe and fastest are the same route.
-  Print it once and add one line saying safe was requested, none were
-  found, and the two collapse.
+  If both were requested, print it once and say none were found and the
+  two collapse.
 
 ## One PDF, several modes
 
@@ -102,7 +103,8 @@ headings, readable contrast, text labels and the A5 print rules. Save the
 completed HTML and render it to PDF when your environment permits. See
 SETUP.md for agent-independent rendering and verification guidance.
 
-- One phase per printed page. A5, phone readable: big type, tap friendly
+- Start each phase on a new printed page; allow it to continue onto further
+  pages as needed without clipping. A5, phone readable: big type, tap friendly
   spacing, readable as a narrow column. Light ink on black on screen, and
   print CSS flipping to black on white.
 - No em dashes anywhere in the document.
